@@ -9,13 +9,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Question struct {
-	ID           int    `json:"id,omitempty"  db:"ID"`
-	QuestionedOn string `json:"questionedOn,omitempty"  db:"QuestionedOn"`
-	QuestionText string `json:"questionText,omitempty"  db:"QuestionText"`
-	AnsweredOn   string `json:"answeredOn,omitempty"  db:"AnsweredOn"`
-	AnswererName int    `json:"answererName,omitempty"  db:"AnswererName"`
-	AnswerText   string `json:"answerText,omitempty"  db:"AnswerText"`
+
+
+type City struct {
+	ID          int    `json:"id,omitempty"  db:"ID"`
+	Name        string `json:"name,omitempty"  db:"Name"`
+	CountryCode string `json:"countryCode,omitempty"  db:"CountryCode"`
+	District    string `json:"district,omitempty"  db:"District"`
+	Population  int    `json:"population,omitempty"  db:"Population"`
 }
 
 func main() {
@@ -25,8 +26,11 @@ func main() {
 	}
 
 	fmt.Println("Connected!")
-	question := Question{}
-	db.Get(&question, "SELECT * FROM question WHERE AnswererName='Zuaki'")
+	cities := []City{}
+	db.Select(&cities, "SELECT * FROM city WHERE CountryCode='JPN'")
 
-	fmt.Printf("QuestionText: %s\n", question.QuestionText)
+	fmt.Println("日本の都市一覧")
+	for _, city := range cities {
+		fmt.Printf("都市名: %s, 人口: %d人\n", city.Name, city.Population)
+	}
 }

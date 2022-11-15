@@ -28,5 +28,5 @@ func main() {
 	question := Question{}
 	db.Get(&question, "SELECT * FROM question WHERE AnswererName='Zuaki'")
 
-	fmt.Printf("Question: %s\n", question.QuestionedOn)
+	fmt.Printf("QuestionText: %s\n", question.QuestionText)
 }

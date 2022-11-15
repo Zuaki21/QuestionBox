@@ -9,12 +9,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+
 type Question struct {
 	ID           int    `json:"id,omitempty"  db:"ID"`
 	QuestionedOn string `json:"questionedOn,omitempty"  db:"QuestionedOn"`
 	QuestionText string `json:"questionText,omitempty"  db:"QuestionText"`
 	AnsweredOn   string `json:"answeredOn,omitempty"  db:"AnsweredOn"`
-	AnswererName int    `json:"answererName,omitempty"  db:"AnswererName"`
+	AnswererName string    `json:"answererName,omitempty"  db:"AnswererName"`
 	AnswerText   string `json:"answerText,omitempty"  db:"AnswerText"`
 }
 
@@ -25,8 +26,17 @@ func main() {
 	}
 
 	fmt.Println("Connected!")
-	question := Question{}
-	db.Get(&question, "SELECT * FROM question WHERE AnswererName='Zuaki'")
 
-	fmt.Printf("QuestionText: %s\n", question.QuestionText)
+	question := Question{}
+	db.Get(&question, "SELECT * FROM question")
+	fmt.Printf("%s: %s\n", question.AnswererName, question.QuestionText)
+
+
+	questions := []Question{}
+	db.Select(&questions, "SELECT * FROM question")
+
+	fmt.Println("質問一覧")
+	for _, question := range questions {
+		fmt.Printf("%s: %s\n", question.AnswererName, question.QuestionText)
+	}
 }

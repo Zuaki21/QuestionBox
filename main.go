@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,11 +15,11 @@ import (
 
 type Question struct {
 	ID           int            `json:"id,omitempty"  db:"ID"`
-	QuestionedOn string         `json:"questionedOn,omitempty"  db:"QuestionedOn"`
+	QuestionedAt string         `json:"questionedAt,omitempty"  db:"QuestionedAt"`
 	QuestionText string         `json:"questionText,omitempty"  db:"QuestionText"`
-	AnsweredOn   string         `json:"answeredOn,omitempty"  db:"AnsweredOn"`
+	AnsweredAt   string         `json:"answeredAt,omitempty"  db:"AnsweredAt"`
 	AnswererName string         `json:"answererName,omitempty"  db:"AnswererName"`
-	AnswerText   sql.NullString `json:"answerText,omitempty"  db:"AnswerText"`
+	AnswerText   string  		`json:"answerText,omitempty"  db:"AnswerText"`
 }
 
 var (
@@ -36,7 +35,7 @@ func main() {
 
 	e := echo.New()
 
-	e.GET("/question/:ID", getQuestionInfoHandler)
+	e.GET("/questions/:ID", getQuestionInfoHandler)
 
 	e.Start(":4000")
 }

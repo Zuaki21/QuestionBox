@@ -12,7 +12,7 @@
 go run main.go
 npm run dev
 ```
-### Mysqlの起動
+### Mysqlに接続
 ```
 mysql -h 127.0.0.1 -u root -p
 ```

@@ -6,20 +6,18 @@ import (
 	"net/http"
 	"os"
 
-	"strconv"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 )
 
 type Question struct {
-	ID           int            `json:"id,omitempty"  db:"ID"`
-	QuestionedAt string         `json:"questionedAt,omitempty"  db:"QuestionedAt"`
-	QuestionText string         `json:"questionText,omitempty"  db:"QuestionText"`
-	AnsweredAt   string         `json:"answeredAt,omitempty"  db:"AnsweredAt"`
-	AnswererName string         `json:"answererName,omitempty"  db:"AnswererName"`
-	AnswerText   string  		`json:"answerText,omitempty"  db:"AnswerText"`
+	ID           int    `json:"id,omitempty"  db:"ID"`
+	QuestionedAt string `json:"questionedAt,omitempty"  db:"QuestionedAt"`
+	QuestionText string `json:"questionText,omitempty"  db:"QuestionText"`
+	AnsweredAt   string `json:"answeredAt,omitempty"  db:"AnsweredAt"`
+	AnswererName string `json:"answererName,omitempty"  db:"AnswererName"`
+	AnswerText   string `json:"answerText,omitempty"  db:"AnswerText"`
 }
 
 var (
@@ -35,24 +33,35 @@ func main() {
 
 	e := echo.New()
 
+	e.GET("/questions", getAllQuestionsInfoHandler)
 	e.GET("/questions/:ID", getQuestionInfoHandler)
 
 	e.Start(":4000")
 }
 
-func getQuestionInfoHandler(c echo.Context) error {
-	ID := c.Param("ID")
-	num, _ := strconv.Atoi(ID)
-
+func getAllQuestionsInfoHandler(c echo.Context) error {
 	questions := []Question{}
 	err := db.Select(&questions, "SELECT * FROM question ORDER BY ID ASC")
 
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	if len(questions) <= num-1 || num-1 < 0 {
+	if len(questions) == 0 {
 		return c.NoContent(http.StatusNotFound)
 	}
 
-	return c.JSON(http.StatusOK, questions[num-1])
+	return c.JSON(http.StatusOK, questions)
+}
+
+func getQuestionInfoHandler(c echo.Context) error {
+	ID := c.Param("ID")
+
+	question := Question{}
+	db.Get(&question, "SELECT * FROM question WHERE ID = ?", c.Param(ID))
+
+	if question.QuestionText == "" {
+		return c.NoContent(http.StatusNotFound)
+	}
+	
+	return c.JSON(http.StatusOK, question)
 }

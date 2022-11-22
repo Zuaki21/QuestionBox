@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
@@ -27,13 +29,31 @@ var (
 	db *sqlx.DB
 )
 
-func main() {
-	_db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOSTNAME"), os.Getenv("DB_PORT"), os.Getenv("DB_DATABASE")))
+// 接続設定
+func ConnectDB() *sqlx.DB {
+	jst, err := time.LoadLocation("Local")
+	if err != nil {
+		log.Fatalf("Cannot Load Location: %s", err)
+	}
+	c := mysql.Config{
+		DBName:    os.Getenv("DB_DATABASE"),
+		User:      os.Getenv("DB_USERNAME"),
+		Passwd:    os.Getenv("DB_PASSWORD"),
+		Addr:      fmt.Sprintf("%s:%s", os.Getenv("DB_HOSTNAME"), os.Getenv("DB_PORT")),
+		Net:       "tcp",
+		ParseTime: true,
+		Collation: "utf8mb4_unicode_ci",
+		Loc:       jst,
+	}
+	db, err := sqlx.Connect("mysql", c.FormatDSN())
 	if err != nil {
 		log.Fatalf("Cannot Connect to Database: %s", err)
 	}
-	db = _db
+	return db
+}
 
+func main() {
+	db = ConnectDB()
 	e := echo.New()
 
 	e.GET("/questions/:ID", getQuestionInfoHandler)

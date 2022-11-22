@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,10 +47,10 @@ func getAllQuestionsInfoHandler(c echo.Context) error {
 	err := db.Select(&questions, "SELECT * FROM question ORDER BY ID ASC")
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.NoContent(http.StatusNotFound)
+		}
 		return c.NoContent(http.StatusInternalServerError)
-	}
-	if len(questions) == 0 {
-		return c.NoContent(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, questions)
@@ -59,10 +61,13 @@ func getQuestionInfoHandler(c echo.Context) error {
 	num, _ := strconv.Atoi(ID)
 
 	question := Question{}
-	db.Get(&question, "SELECT * FROM question WHERE ID = ?", num)
+	err := db.Get(&question, "SELECT * FROM question WHERE ID = ?", num)
 
-	if question.QuestionText == "" {
-		return c.NoContent(http.StatusNotFound)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, question)

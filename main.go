@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 )
@@ -23,6 +22,7 @@ type Question struct {
 	AnsweredAt   string `json:"answeredAt,omitempty"  db:"AnsweredAt"`
 	AnswererName string `json:"answererName,omitempty"  db:"AnswererName"`
 	AnswerText   string `json:"answerText,omitempty"  db:"AnswerText"`
+	IsAnswered	bool   `json:"isAnswered"  db:"IsAnswered"`
 }
 
 var (
@@ -82,13 +82,11 @@ func getQuestionInfoHandler(c echo.Context) error {
 
 	question := Question{}
 	err := db.Get(&question, "SELECT * FROM question WHERE ID = ?", num)
-
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.NoContent(http.StatusNotFound)
 		}
 		return c.NoContent(http.StatusInternalServerError)
 	}
-
 	return c.JSON(http.StatusOK, question)
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -33,8 +34,8 @@ func main() {
 
 	e := echo.New()
 
-	e.GET("/questions", getAllQuestionsInfoHandler)
 	e.GET("/questions/:ID", getQuestionInfoHandler)
+	e.GET("/questions", getAllQuestionsInfoHandler)
 
 	e.Start(":4000")
 }
@@ -55,13 +56,14 @@ func getAllQuestionsInfoHandler(c echo.Context) error {
 
 func getQuestionInfoHandler(c echo.Context) error {
 	ID := c.Param("ID")
+	num, _ := strconv.Atoi(ID)
 
 	question := Question{}
-	db.Get(&question, "SELECT * FROM question WHERE ID = ?", c.Param(ID))
+	db.Get(&question, "SELECT * FROM question WHERE ID = ?", num)
 
 	if question.QuestionText == "" {
 		return c.NoContent(http.StatusNotFound)
 	}
-	
+
 	return c.JSON(http.StatusOK, question)
 }

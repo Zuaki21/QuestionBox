@@ -2,7 +2,7 @@ import axios from "axios";
 import { useCallback, useState } from "react";
 import { Navigate, Route } from "react-router-dom";
 import "./login.css";
-function Login() {
+function Signup() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [isLogin, setIsLogin] = useState(false);
@@ -12,17 +12,31 @@ function Login() {
         (e) => {
             e.preventDefault();
             axios
-                .post("/api/login", {
+                .post("/api/signup", {
                     username: username,
                     password: password,
                 })
                 .then((e) => {
-                    if (e.status === 200) {
-                        setIsLogin(true);
+                    if (e.status === 201) {
+                        //作成を確認したら続けてログインする
+                        axios
+                            .post("/api/login", {
+                                username: username,
+                                password: password,
+                            })
+                            .then((e) => {
+                                if (e.status === 200) {
+                                    setIsLogin(true);
+                                }
+                            });
                     }
                 })
                 .catch((e) => {
-                    setAlertText("ユーザー名またはパスワードが間違っています");
+                    if (e.response.status === 409) {
+                        setAlertText("同じユーザー名が既に存在します");
+                    } else if (e.response.status === 400) {
+                        setAlertText("項目が空です");
+                    }
                 });
         },
         [username, password]
@@ -33,7 +47,7 @@ function Login() {
     }
     return (
         <div>
-            <h1>ログインページ</h1>
+            <h1>ユーザー登録</h1>
             <form>
                 <div>
                     <div className="alertText">{alertText}</div>
@@ -56,15 +70,15 @@ function Login() {
                 </div>
                 <div>
                     <button type="submit" onClick={onClickHandler}>
-                        ログイン
+                        登録
                     </button>
                 </div>
             </form>
             <div>
-                <a href="/signup">ユーザー登録はこちら</a>
+                <a href="/login">ログインはこちら</a>
             </div>
         </div>
     );
 }
 
-export default Login;
+export default Signup;

@@ -3,28 +3,29 @@ import { useEffect, useState } from "react";
 import { Navigate, Route } from "react-router-dom";
 
 function PrivateRoute({ children }) {
-    const [loading, setLoading] = useState(true)
-    const [isLogin, setIsLogin] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const [isLogin, setIsLogin] = useState(false);
 
     useEffect(() => {
-        axios.get('/api/whoami')
-            .then(e => {
+        axios
+            .get("/api/whoami")
+            .then((e) => {
                 if (e.status === 200) {
-                    setIsLogin(true)
+                    setIsLogin(true);
                 }
             })
             .finally(() => {
-                setLoading(false)
-            })
-    }, [])
+                setLoading(false);
+            });
+    }, []);
 
     if (!loading) {
         if (isLogin) {
-            return children
+            return children;
         } else {
-            return <Navigate replace to='/login' />
+            return <Navigate replace to="/login" />;
         }
     }
 }
 
-export default PrivateRoute
+export default PrivateRoute;

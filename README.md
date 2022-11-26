@@ -10,7 +10,7 @@
 ```
 .\env.bat
 go run main.go
-npm run dev
+npm run dev (frontディレクトリに移動した後に)
 ```
 ### Mysqlに接続
 ```

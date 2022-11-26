@@ -10,9 +10,9 @@
 ```
 .\env.bat
 go run main.go
-npm run dev
+npm run dev (frontディレクトリに移動した後に)
 ```
-### Mysqlの起動
+### Mysqlに接続
 ```
 mysql -h 127.0.0.1 -u root -p
 ```
@@ -21,11 +21,4 @@ mysql -h 127.0.0.1 -u root -p
 ```
 Zuaki
 Zuakipassword
-```
-
-### テーブル生成時の文
-```
-CREATE TABLE question (ID INT NOT NULL AUTO_INCREMENT, QuestionedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP, QuestionText VARCHAR(256) NOT NULL, AnsweredOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, AnswererName VARCHAR(10) NOT NULL, AnswerText VARCHAR(256), PRIMARY KEY (ID));
-
-INSERT INTO question (QuestionText, AnswererName) VALUES ("こんにちは！","Zuaki");
 ```

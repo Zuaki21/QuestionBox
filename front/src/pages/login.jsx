@@ -5,7 +5,6 @@ import "./login.css";
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [isLogin, setIsLogin] = useState(false);
     const [alertText, setAlertText] = useState("");
 
     const onClickHandler = useCallback(
@@ -18,7 +17,7 @@ function Login() {
                 })
                 .then((e) => {
                     if (e.status === 200) {
-                        setIsLogin(true);
+                        window.location.reload();
                     }
                 })
                 .catch((e) => {
@@ -28,9 +27,6 @@ function Login() {
         [username, password]
     );
 
-    if (isLogin) {
-        return <Navigate replace to="/questions" />;
-    }
     return (
         <div>
             <h1>ログインページ</h1>

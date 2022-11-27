@@ -5,7 +5,6 @@ import "./login.css";
 function Signup() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [isLogin, setIsLogin] = useState(false);
     const [alertText, setAlertText] = useState("");
 
     const onClickHandler = useCallback(
@@ -26,7 +25,7 @@ function Signup() {
                             })
                             .then((e) => {
                                 if (e.status === 200) {
-                                    setIsLogin(true);
+                                    window.location.reload();
                                 }
                             });
                     }
@@ -41,10 +40,6 @@ function Signup() {
         },
         [username, password]
     );
-
-    if (isLogin) {
-        return <Navigate replace to="/questions" />;
-    }
     return (
         <div>
             <h1>ユーザー登録</h1>

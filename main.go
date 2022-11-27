@@ -40,7 +40,7 @@ func ConnectDB() *sqlx.DB {
 	}
 	c := mysql.Config{
 		DBName:    os.Getenv("DB_DATABASE"),
-		User:      os.Getenv("DB_USERNAME"),
+		User:      os.Getenv("DB_userName"),
 		Passwd:    os.Getenv("DB_PASSWORD"),
 		Addr:      fmt.Sprintf("%s:%s", os.Getenv("DB_HOSTNAME"), os.Getenv("DB_PORT")),
 		Net:       "tcp",
@@ -72,9 +72,15 @@ func main() {
 	withLogin.Use(checkLogin)
 
 	//質問関連
-	withLogin.GET("/answers", getAllAnswersInfoHandler)     //全ての回答を取得
-	withLogin.GET("/questions/:ID", getQuestionInfoHandler) //1つだけ質問を取得
-	withLogin.GET("/questions", getAllQuestionsInfoHandler) //全ての質問を取得
+	e.POST("/questions//:userName", postQuestionInfoHandler)                       //新たな質問を投稿
+	e.GET("/questions/:ID//answered", getAnsweredQuestionInfoByIDHandler)          //1つだけ回答済み質問を取得
+	e.GET("/questions//:userName/answered", getAnsweredQuestionsInfoByUserHandler) //対象ユーザーの回答を取得
+	e.GET("/questions///answered", getAllAnsweredQuestionsInfoHandler)             //全ての回答済み質問を取得
+	e.GET("/hogehoge", getAllAnsweredQuestionsInfoHandler)                         //全ての回答済み質問を取得
+
+	withLogin.GET("/questions/:ID", getQuestionInfoHandler)     //1つだけ質問を取得
+	withLogin.POST("/questions/:ID", postQuestionAnswerHandler) //質問に回答
+	withLogin.GET("/questions", getAllQuestionsInfoHandler)     //全ての質問を取得
 
 	//ログイン関連
 	e.POST("/login", postLoginHandler)
@@ -92,7 +98,7 @@ func main() {
 
 // ////ここからログイン関連の処理//////
 type LoginRequestBody struct {
-	Username string `json:"username,omitempty" form:"username"`
+	Username string `json:"username,omitempty" form:"Username"`
 	Password string `json:"password,omitempty" form:"password"`
 }
 
@@ -119,7 +125,7 @@ func postSignUpHandler(c echo.Context) error {
 	// ユーザーの存在チェック
 	var count int
 
-	err = db.Get(&count, "SELECT COUNT(*) FROM users WHERE Username=?", req.Username)
+	err = db.Get(&count, "SELECT COUNT(*) FROM users WHERE userName=?", req.Username)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("db error: %v", err))
 	}
@@ -128,7 +134,7 @@ func postSignUpHandler(c echo.Context) error {
 		return c.String(http.StatusConflict, "ユーザーが既に存在しています")
 	}
 
-	_, err = db.Exec("INSERT INTO users (Username, HashedPass) VALUES (?, ?)", req.Username, hashedPass)
+	_, err = db.Exec("INSERT INTO users (userName, HashedPass) VALUES (?, ?)", req.Username, hashedPass)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("db error: %v", err))
 	}
@@ -141,7 +147,7 @@ func postLoginHandler(c echo.Context) error {
 
 	//対象のユーザー情報をDBから取得
 	user := User{}
-	err := db.Get(&user, "SELECT * FROM users WHERE username=?", req.Username)
+	err := db.Get(&user, "SELECT * FROM users WHERE userName=?", req.Username)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("db error: %v", err))
 	}
@@ -196,8 +202,8 @@ func checkLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-///////////////////////////////////////////////////////////////////
-//////ここから質問関連の処理//////
+// /////////////////////////////////////////////////////////////////
+// ////ここから質問関連の処理//////
 type Question struct {
 	ID           int       `json:"id,omitempty"  db:"ID"`
 	QuestionedAt time.Time `json:"questionedAt,omitempty"  db:"QuestionedAt"`
@@ -207,10 +213,79 @@ type Question struct {
 	AnswerText   string    `json:"answerText,omitempty"  db:"AnswerText"`
 	IsAnswered   bool      `json:"isAnswered"  db:"IsAnswered"`
 }
+type QuestionText struct {
+	QuestionText string `json:"questionText,omitempty"  db:"QuestionText"`
+}
+type AnswerText struct {
+	AnswerText string `json:"answerText,omitempty"  db:"AnswerText"`
+}
 
-func getAllAnswersInfoHandler(c echo.Context) error {
+func postQuestionAnswerHandler(c echo.Context) error {
+	ID := c.Param("ID")
+	num, _ := strconv.Atoi(ID)
+	// リクエストボディから取得
+	req := AnswerText{}
+	err := c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("bind error: %v", err))
+	}
+
+	if req.AnswerText == "" {
+		// エラーは真面目に返すべき
+		return c.String(http.StatusBadRequest, "項目が空です")
+	}
+	// ログイン者を取得
+	userName := c.Get("userName").(string)
+
+	// DBに保存
+	_, err = db.Exec("UPDATE question SET AnswerText=?, IsAnswered=? WHERE  AnswererName=? AND ID=?", req.AnswerText, true, userName, num)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("db error: %v", err))
+	}
+
+	return c.NoContent(http.StatusCreated)
+
+}
+func postQuestionInfoHandler(c echo.Context) error {
+	userName := c.Param("userName")
+
+	// リクエストボディから取得
+	req := QuestionText{}
+	err := c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("bind error: %v", err))
+	}
+	if req.QuestionText == "" {
+		// エラーは真面目に返すべき
+		return c.String(http.StatusBadRequest, "項目が空です")
+	}
+	// DBに保存
+	_, err = db.Exec("INSERT INTO question (QuestionText, AnswererName) VALUES (?, ?)", req.QuestionText, userName)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("db error: %v", err))
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+func getAnsweredQuestionInfoByIDHandler(c echo.Context) error {
+	ID := c.Param("ID")
+	num, _ := strconv.Atoi(ID)
+
+	question := Question{}
+	err := db.Get(&question, "SELECT * FROM question WHERE ID = ? AND IsAnswered = true", num)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, question)
+}
+func getAnsweredQuestionsInfoByUserHandler(c echo.Context) error {
 	questions := []Question{}
-	err := db.Select(&questions, "SELECT * FROM question WHERE IsAnswered = true ORDER BY ID ASC")
+	userName := c.Param("userName")
+	err := db.Select(&questions, "SELECT * FROM question WHERE AnswererName = ? AND IsAnswered = true ORDER BY ID ASC", userName)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -221,9 +296,24 @@ func getAllAnswersInfoHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, questions)
 }
+
+func getAllAnsweredQuestionsInfoHandler(c echo.Context) error {
+	questions := []Question{}
+	err := db.Select(&questions, "SELECT * FROM question WHERE IsAnswered = true ORDER BY ID ASC")
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, questions)
+}
 func getAllQuestionsInfoHandler(c echo.Context) error {
 	questions := []Question{}
-	err := db.Select(&questions, "SELECT * FROM question ORDER BY ID ASC")
+	userName := c.Get("userName").(string)
+	err := db.Select(&questions, "SELECT * FROM question WHERE AnswererName = ? ORDER BY ID ASC", userName)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -238,9 +328,10 @@ func getAllQuestionsInfoHandler(c echo.Context) error {
 func getQuestionInfoHandler(c echo.Context) error {
 	ID := c.Param("ID")
 	num, _ := strconv.Atoi(ID)
+	userName := c.Get("userName").(string)
 
 	question := Question{}
-	err := db.Get(&question, "SELECT * FROM question WHERE ID = ?", num)
+	err := db.Get(&question, "SELECT * FROM question WHERE AnswererName = ? AND ID = ?", userName, num)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.NoContent(http.StatusNotFound)
@@ -250,8 +341,8 @@ func getQuestionInfoHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, question)
 }
 
-/////////////////////////////////////////////////////////////////////
-//////ここから実習編の時のもの(参考用 最終的に消す)//////
+// ///////////////////////////////////////////////////////////////////
+// ////ここから実習編の時のもの(参考用 最終的に消す)//////
 func getCityInfoHandler(c echo.Context) error {
 	cityName := c.Param("cityName")
 
@@ -265,7 +356,7 @@ func getCityInfoHandler(c echo.Context) error {
 }
 
 type Me struct {
-	Username string `json:"username,omitempty"  db:"username"`
+	Username string `json:"username,omitempty"  db:"Username"`
 }
 
 func whoAmIHandler(c echo.Context) error {

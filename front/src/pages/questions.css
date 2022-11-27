@@ -1,0 +1,115 @@
+.LinkBox {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.questionHead {
+    font-weight: normal;
+    font-size: 1.5em;
+}
+.question {
+    background-color: #272a2c;
+    width: 350px;
+    height: 150px;
+    padding: 10px;
+    border: 3px dashed #bccaff;
+    margin: 0 auto;
+    margin-top: 20px;
+    position: relative;
+    transition-duration: 0.1s;
+}
+.answer {
+    border: 3px dashed #ffaeae;
+}
+.questions {
+    background-color: #272a2c;
+    width: 300px;
+    height: 130px;
+    padding: 10px;
+    border: 2px dashed #b0b0b0;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    position: relative;
+    transition-duration: 0.1s;
+}
+.questions:hover {
+    width: 305px;
+    border: 2px solid #ffffff;
+}
+.questionedTime {
+    font-size: small;
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    color: #b2b2b2;
+}
+
+.questionText {
+    position: absolute;
+    font-size: 1.3rem;
+    font-weight: 500;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translateY(-50%) translateX(-50%);
+    color: #e9ecef;
+}
+.questionLabel {
+    font-size: 1.1rem;
+    position: absolute;
+    left: 10px;
+    top: 5px;
+}
+
+.isAnsweredTrue {
+    font-size: medium;
+    position: absolute;
+    left: 10px;
+    top: 0;
+    color: #ffb1b1;
+}
+
+.isAnsweredFalse {
+    font-size: medium;
+    position: absolute;
+    left: 10px;
+    top: 0;
+    color: #b1d8ff;
+}
+textarea {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    resize: none;
+    width: 340px;
+    height: 105px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    border: 1px solid #757575;
+    background-color: #272a2c;
+}
+.isDisplay{
+    display: block;
+}
+.isNotDisplay{
+    display: none;
+}
+.submitbutton {
+    font-size: small;
+    position: absolute;
+    bottom: 2%;
+    right: 1%;
+    color: #b2b2b2;
+}
+.alertLabel{
+    font-size: 1.1rem;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    color: #ff0000;
+}

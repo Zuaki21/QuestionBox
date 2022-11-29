@@ -22,6 +22,11 @@ function Questions() {
                 <React.Fragment>
                     <h1 className="questionHead">あなたへの質問一覧</h1>
                     <div>
+                        {questionsInfo.length === 0 ? (
+                            <div>届いた質問はありません</div>
+                        ) : (
+                            ""
+                        )}
                         {questionsInfo.map((questionInfo) => {
                             var date = new Date(questionInfo.questionedAt);
                             const dateText = `${date.getFullYear()}年${

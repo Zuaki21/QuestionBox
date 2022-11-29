@@ -37,10 +37,18 @@ function Header({ children }) {
         if (isLogin) {
             const elements = [
                 <header>
-                    <div>こんにちは {UserInfo.username} さん！</div>
-                    <button type="button" onClick={onClickHandler}>
-                        ログアウトする
-                    </button>
+                    <div className="left">
+                        <a href="/home">ホームに戻る</a>
+                    </div>
+                    <div className="right">
+                        <div>
+                            こんにちは{" "}
+                            <a href="/questions">{UserInfo.username}</a> さん！
+                        </div>
+                        <div>
+                            <a onClick={onClickHandler}>ログアウトする</a>
+                        </div>
+                    </div>
                 </header>,
                 children,
             ];
@@ -48,11 +56,16 @@ function Header({ children }) {
         } else {
             const elements = [
                 <header>
-                    <div>
-                        <a href="/login">ログインはこちら</a>
+                    <div className="left">
+                        <a href="/home">ホームに戻る</a>
                     </div>
-                    <div>
-                        <a href="/signup">新規登録はこちら</a>
+                    <div className="right">
+                        <div>
+                            <a href="/login">ログインはこちら</a>
+                        </div>
+                        <div>
+                            <a href="/signup">新規登録はこちら</a>
+                        </div>
                     </div>
                 </header>,
                 children,

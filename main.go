@@ -70,17 +70,19 @@ func main() {
 
 	withLogin := e.Group("")
 	withLogin.Use(checkLogin)
+	
+	e.GET("/users", getUsersHandler)     //全てのユーザーを取得
 
 	//質問関連
-	e.POST("/questions//:userName", postQuestionInfoHandler)                       //新たな質問を投稿
-	e.GET("/questions/:ID//answered", getAnsweredQuestionInfoByIDHandler)          //1つだけ回答済み質問を取得
-	e.GET("/questions//:userName/answered", getAnsweredQuestionsInfoByUserHandler) //対象ユーザーの回答を取得
-	e.GET("/questions///answered", getAllAnsweredQuestionsInfoHandler)             //全ての回答済み質問を取得
-	e.GET("/hogehoge", getAllAnsweredQuestionsInfoHandler)                         //全ての回答済み質問を取得
+	e.POST("/questions/ask/:userName", postQuestionInfoHandler)                        //新たな質問を投稿
+	e.GET("/questions/answered/user/:userName/id/:ID", getAnsweredQuestionInfoByIDHandler)            //1つだけ回答済み質問を取得
+	e.GET("/questions/answered/user/:userName", getAnsweredQuestionsInfoByUserHandler) //対象ユーザーの回答を取得
+	e.GET("/questions/answered", getAllAnsweredQuestionsInfoHandler)                   //全ての回答済み質問を取得
 
 	withLogin.GET("/questions/:ID", getQuestionInfoHandler)     //1つだけ質問を取得
 	withLogin.POST("/questions/:ID", postQuestionAnswerHandler) //質問に回答
 	withLogin.GET("/questions", getAllQuestionsInfoHandler)     //全ての質問を取得
+	
 
 	//ログイン関連
 	e.POST("/login", postLoginHandler)
@@ -202,6 +204,19 @@ func checkLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func getUsersHandler(c echo.Context) error {
+	user := []User{}
+	err := db.Select(&user, "SELECT * FROM users")
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.String(http.StatusNotFound, err.Error())
+		}
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
 // /////////////////////////////////////////////////////////////////
 // ////ここから質問関連の処理//////
 type Question struct {
@@ -269,11 +284,12 @@ func postQuestionInfoHandler(c echo.Context) error {
 }
 
 func getAnsweredQuestionInfoByIDHandler(c echo.Context) error {
+	userName := c.Param("userName")
 	ID := c.Param("ID")
 	num, _ := strconv.Atoi(ID)
 
 	question := Question{}
-	err := db.Get(&question, "SELECT * FROM question WHERE ID = ? AND IsAnswered = true", num)
+	err := db.Get(&question, "SELECT * FROM question WHERE ID = ? AND AnswererName = ? AND IsAnswered = true", num, userName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.NoContent(http.StatusNotFound)
@@ -285,7 +301,7 @@ func getAnsweredQuestionInfoByIDHandler(c echo.Context) error {
 func getAnsweredQuestionsInfoByUserHandler(c echo.Context) error {
 	questions := []Question{}
 	userName := c.Param("userName")
-	err := db.Select(&questions, "SELECT * FROM question WHERE AnswererName = ? AND IsAnswered = true ORDER BY ID ASC", userName)
+	err := db.Select(&questions, "SELECT * FROM question WHERE AnswererName = ? AND IsAnswered = true ORDER BY AnsweredAt ASC", userName)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

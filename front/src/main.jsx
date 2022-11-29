@@ -10,15 +10,40 @@ import PublicRoute from "./lib/PublicRoute";
 import Header from "./lib/Header";
 import Signup from "./pages/signup";
 import User from "./pages/user";
+import UserQuestion from "./pages/userQuestion";
+import Home from "./pages/home.jsx";
+import { Navigate } from "react-router-dom";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<App />} />
-                <Route path="/add/path/test" element={<App />} />
-                <Route path="/user" element={<User />} />
+                <Route path="/" element={<Navigate replace to="/home" />} />
+                <Route
+                    path="/home"
+                    element={
+                        <Header>
+                            <Home />
+                        </Header>
+                    }
+                />
+                <Route
+                    path="/home/:userName"
+                    element={
+                        <Header>
+                            <User />
+                        </Header>
+                    }
+                />
+                <Route
+                    path="/home/:userName/:questionID"
+                    element={
+                        <Header>
+                            <UserQuestion />
+                        </Header>
+                    }
+                />
                 <Route
                     path="/login"
                     element={

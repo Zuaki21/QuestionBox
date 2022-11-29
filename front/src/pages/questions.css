@@ -35,6 +35,10 @@
     position: relative;
     transition-duration: 0.1s;
 }
+.new {
+    border: 2px dashed #ffffff;
+    margin-bottom: 2%;
+}
 .questions:hover {
     width: 305px;
     border: 2px solid #ffffff;
@@ -47,6 +51,12 @@
     color: #b2b2b2;
 }
 
+hr {
+    height: 1px;
+    width: 40%;
+    background-color: #646464;
+    border: none;
+}
 .questionText {
     position: absolute;
     font-size: 1.3rem;
@@ -89,14 +99,14 @@ textarea {
     height: 105px;
     text-align: center;
     font-size: 1.2rem;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
     border: 1px solid #757575;
     background-color: #272a2c;
 }
-.isDisplay{
+.isDisplay {
     display: block;
 }
-.isNotDisplay{
+.isNotDisplay {
     display: none;
 }
 .submitbutton {
@@ -106,10 +116,14 @@ textarea {
     right: 1%;
     color: #b2b2b2;
 }
-.alertLabel{
+.alertLabel {
     font-size: 1.1rem;
     position: absolute;
     right: 10px;
     top: 5px;
     color: #ff0000;
+}
+
+button{
+    margin: 10px;
 }

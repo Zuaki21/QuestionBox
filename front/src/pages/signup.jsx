@@ -40,9 +40,18 @@ function Signup() {
         },
         [username, password]
     );
+
+    const goBackHandler = useCallback((e) => {
+        e.preventDefault();
+        history.back(-1);
+    }, []);
+
     return (
         <div>
             <h1>ユーザー登録</h1>
+            <div>
+                <a href="/login">ログインはこちら</a>
+            </div>
             <form>
                 <div>
                     <div className="alertText">{alertText}</div>
@@ -70,7 +79,9 @@ function Signup() {
                 </div>
             </form>
             <div>
-                <a href="/login">ログインはこちら</a>
+                <a href="#" onClick={goBackHandler}>
+                    戻る
+                </a>
             </div>
         </div>
     );
